@@ -38,6 +38,7 @@
                         <th>Date of Birth</th>
                         <th>Hire Date</th>
                         <th></th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -51,6 +52,14 @@
                             <td><c:out value="${employee.hireDate}" /></td>
                             <td>
                                 <form action="" method="post">
+                                    <input type="hidden" name="action" value="editEmployee">
+                                    <input type="hidden" name="arrayIndex" 
+                                           value="<c:out value='${status.index}'/>">
+                                    <input class="btn btn-primary btn-block" type="submit" value="Edit">
+                                </form>
+                            </td>
+                            <td>
+                                <form action="" method="post">
                                     <input type="hidden" name="action" value="removeEmployee">
                                     <input type="hidden" name="arrayIndex" 
                                            value="<c:out value='${status.index}'/>">
@@ -61,12 +70,12 @@
                     </c:forEach>     
                 </tbody>
             </table>
-            <c:if test="${isNewSession == false}">
+            <%--<c:if test="${isNewSession == true}">--%>
                 <form action="" method="post">
                     <input type="hidden" name="action" value="destroySession">
                     <input class="btn btn-warning" type="submit" value="Destroy Session">
                 </form>     
-            </c:if>
+            <%--</c:if>--%>
 
         </div> <!-- end col-md-12 -->
     </div> <!-- end row results -->
@@ -75,6 +84,7 @@
         <h2>Add new employee</h2>
         <form action="Controller" method="post">
             <input type="hidden" name="action" value="addEmployee">
+            <input type="hidden" name="arrayIndex" value="<c:out value='${employeeIndex}' />">
             <div class="form-group row">
                 <label for="first-name" class="col-md-3 col-form-label">First name:</label>
                 <div class="col-md-9">
@@ -113,7 +123,14 @@
             </div>
             <div class="form-group row">
                 <div>
-                    <input class="btn btn-primary" type="submit" value="Add Employee">
+                    <c:choose>
+                        <c:when test="${isUpdate == false}">
+                            <input class="btn btn-primary" type="submit" value="Add Employee">
+                        </c:when>
+                        <c:otherwise>
+                            <input class="btn btn-primary" type="submit" value="Update Employee">
+                        </c:otherwise>
+                    </c:choose>
                 </div>
             </div>
         </form>

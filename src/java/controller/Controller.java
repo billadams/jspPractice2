@@ -41,22 +41,20 @@ public class Controller extends HttpServlet {
         String url = "/display.jsp";
         ArrayList<String> messages = new ArrayList<String>();
         HttpSession session = request.getSession();
-        boolean isNewSession = session.isNew();
+//        boolean isNewSession = session.isNew();
         String birthDateInputString = null;
         String hireDateInputString = null;
+        boolean isUpdate = false;
 
         String action = request.getParameter("action");
         if (action == null) {
             action = "first";
         }
-
-//        ArrayList<Person> arrList = new ArrayList<Person>();
-//        arrList.add(new Person("Pris", "", "Stratton", "731",
-//                LocalDate.of(2016, Month.FEBRUARY, 14), LocalDate.of(2016, Month.FEBRUARY, 14)));
-//        arrList.add(new Person("Roy", "", "Batty", "734",
-//                LocalDate.of(2016, Month.JANUARY, 8), LocalDate.of(2016, Month.JANUARY, 9)));
-//        request.setAttribute("arrList", arrList);
         
+        String updateEmployee = request.getParameter("updateEmployee");
+
+        // Create the default list of employees and add
+        // them to the session.
         ArrayList<Person> employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
         if  (employeeList == null) {
             employeeList = new ArrayList<Person>();
@@ -71,11 +69,20 @@ public class Controller extends HttpServlet {
 
         if (action.equals("first")) {
             url = "/display.jsp";
+//            request.setAttribute("isNewSession", isNewSession);
+            session.setAttribute("isUpdate", isUpdate);
         }
         else if (action.equals("addEmployee")) {
             String validationMessage = "";
             LocalDate birthDate = null;
             LocalDate hireDate = null;
+            
+            if (updateEmployee.isEmpty()) {
+                isUpdate = false;
+            }
+            else {
+                isUpdate = true;
+            }
             
             // Validate the form input.
             String firstName = request.getParameter("firstName");
@@ -118,25 +125,78 @@ public class Controller extends HttpServlet {
                 hireDateInputString = DateUtil.createFormattedDateInputString(hireDate);
             }
             
+            // If messages comes back empty (i.e. everything validated), create 
+            // or update the person collection and add it to the session.
             if (messages.isEmpty()) {
-                employeeList.add(new Person(firstName, middleName, lastName, employeeID, birthDate, hireDate));
-                session.setAttribute("employeeList", employeeList);
+                if (updateEmployee.isEmpty()) {
+                    
+                    // Add a new employee.
+                    employeeList.add(new Person(firstName, middleName, lastName, employeeID, birthDate, hireDate));
+                    session.setAttribute("employeeList", employeeList);
+                    session.setAttribute("isUpdate", isUpdate);
+                }
+                else {
+                    
+                    // Update an existing employee.
+                    employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
+                    int employeeIndex = Integer.parseInt(request.getParameter("updateEmployee"));
+                    Person employeeToEdit = employeeList.get(employeeIndex);
+
+                    employeeToEdit.setFirstName(firstName);
+                    employeeToEdit.setMiddleName(middleName);
+                    employeeToEdit.setLastName(lastName);
+                    employeeToEdit.setEmployeeID(employeeID);
+                    employeeToEdit.setBirthDate(birthDate);
+                    employeeToEdit.setHireDate(hireDate);
+                    
+                    session.setAttribute("isUpdate", isUpdate);
+                    request.setAttribute("employeeIndex", employeeIndex);
+                }
             }
-            else {
-                request.setAttribute("messages", messages);   
+            else {             
+                // Set attributes the user completed and return them 
+                // to the form during the validation process.
+                request.setAttribute("firstName", firstName);
+                request.setAttribute("middleName", middleName);
+                request.setAttribute("lastName", lastName);
+                request.setAttribute("employeeID", employeeID);
+                request.setAttribute("birthDateInputString", birthDateInputString);
+                request.setAttribute("hireDateInputString", hireDateInputString);
+                
+                if (!updateEmployee.isEmpty()) {
+                    employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
+                    int employeeIndex = Integer.parseInt(request.getParameter("arrayIndex"));
+                    Person employeeToEdit = employeeList.get(employeeIndex);
+
+                    request.setAttribute("employeeIndex", employeeIndex);
+                }
+
+                request.setAttribute("messages", messages);
+                session.setAttribute("isUpdate", isUpdate);
             }    
 
+        }
+        else if (action.equals("editEmployee")) {
+            isUpdate = true;
             
-            request.setAttribute("firstName", firstName);
-            request.setAttribute("middleName", middleName);
-            request.setAttribute("lastName", lastName);
-            request.setAttribute("employeeID", employeeID);
-            request.setAttribute("birthDateInputString", birthDateInputString);
-            request.setAttribute("hireDateInputString", hireDateInputString);
+            employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
+            int employeeIndex = Integer.parseInt(request.getParameter("arrayIndex"));
+            Person employeeToEdit = employeeList.get(employeeIndex);
+            
+            request.setAttribute("isUpdate", isUpdate);
+            request.setAttribute("employeeIndex", employeeIndex);          
+            request.setAttribute("firstName", employeeToEdit.getFirstName());
+            request.setAttribute("middleName", employeeToEdit.getMiddleName());
+            request.setAttribute("lastName", employeeToEdit.getLastName());
+            request.setAttribute("employeeID", employeeToEdit.getEmployeeID());
+            request.setAttribute("birthDateInputString", 
+                    DateUtil.createFormattedDateInputString(employeeToEdit.getBirthDate()));
+            request.setAttribute("hireDateInputString", 
+                    DateUtil.createFormattedDateInputString(employeeToEdit.getHireDate()));
         }
         else if (action.equals("removeEmployee")) {
             String indexString = request.getParameter("arrayIndex");
-//            boolean indexExists = false;
+
             int index = -1;
             
             try {
@@ -144,7 +204,6 @@ public class Controller extends HttpServlet {
             }
             catch (Exception e) {
                 messages.add("The employee index specified is not a valid integer.");
-//                request.setAttribute("messages", messages);
             }
             
             if (index >= 0 && index < employeeList.size()) {
@@ -159,9 +218,10 @@ public class Controller extends HttpServlet {
         }
         else if (action.equals("destroySession")) {
             session.invalidate();
+//            isNewSession = false;
+//            request.setAttribute("isNewSession", isNewSession);
         }
         
-        request.setAttribute("isNewSession", isNewSession);
 
         ServletContext sc = getServletContext();
 
