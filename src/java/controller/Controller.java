@@ -45,6 +45,8 @@ public class Controller extends HttpServlet {
         String birthDateInputString = null;
         String hireDateInputString = null;
         boolean isUpdate = false;
+        // Set employeeList arrayIndex to -1 to indicate it hasn't been set.
+        int arrayIndex = -1;
 
         String action = request.getParameter("action");
         if (action == null) {
@@ -77,11 +79,18 @@ public class Controller extends HttpServlet {
             LocalDate birthDate = null;
             LocalDate hireDate = null;
             
-            if (updateEmployee.isEmpty()) {
+            if (arrayIndex == -1) {
                 isUpdate = false;
             }
             else {
                 isUpdate = true;
+            }
+            
+            try {
+                arrayIndex = Integer.parseInt(request.getParameter("arrayIndex"));
+            }
+            catch (NumberFormatException e) {
+                arrayIndex = -1;
             }
             
             // Validate the form input.
@@ -128,7 +137,7 @@ public class Controller extends HttpServlet {
             // If messages comes back empty (i.e. everything validated), create 
             // or update the person collection and add it to the session.
             if (messages.isEmpty()) {
-                if (updateEmployee.isEmpty()) {
+                if (arrayIndex == -1) {
                     
                     // Add a new employee.
                     employeeList.add(new Person(firstName, middleName, lastName, employeeID, birthDate, hireDate));
@@ -139,8 +148,8 @@ public class Controller extends HttpServlet {
                     
                     // Update an existing employee.
                     employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
-                    int employeeIndex = Integer.parseInt(request.getParameter("updateEmployee"));
-                    Person employeeToEdit = employeeList.get(employeeIndex);
+//                    arrayIndex = Integer.parseInt(request.getParameter("updateEmployee"));
+                    Person employeeToEdit = employeeList.get(arrayIndex);
 
                     employeeToEdit.setFirstName(firstName);
                     employeeToEdit.setMiddleName(middleName);
@@ -150,7 +159,7 @@ public class Controller extends HttpServlet {
                     employeeToEdit.setHireDate(hireDate);
                     
                     session.setAttribute("isUpdate", isUpdate);
-                    request.setAttribute("employeeIndex", employeeIndex);
+//                    request.setAttribute("employeeIndex", employeeIndex);
                 }
             }
             else {             
@@ -163,12 +172,12 @@ public class Controller extends HttpServlet {
                 request.setAttribute("birthDateInputString", birthDateInputString);
                 request.setAttribute("hireDateInputString", hireDateInputString);
                 
-                if (!updateEmployee.isEmpty()) {
-                    employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
-                    int employeeIndex = Integer.parseInt(request.getParameter("arrayIndex"));
-                    Person employeeToEdit = employeeList.get(employeeIndex);
+                if (arrayIndex != -1) {
+//                    employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
+//                    arrayIndex = Integer.parseInt(request.getParameter("arrayIndex"));
+//                    Person employeeToEdit = employeeList.get(arrayIndex);
 
-                    request.setAttribute("employeeIndex", employeeIndex);
+                    request.setAttribute("employeeIndex", arrayIndex);
                 }
 
                 request.setAttribute("messages", messages);
@@ -180,11 +189,11 @@ public class Controller extends HttpServlet {
             isUpdate = true;
             
             employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
-            int employeeIndex = Integer.parseInt(request.getParameter("arrayIndex"));
-            Person employeeToEdit = employeeList.get(employeeIndex);
+            arrayIndex = Integer.parseInt(request.getParameter("arrayIndex"));
+            Person employeeToEdit = employeeList.get(arrayIndex);
             
             request.setAttribute("isUpdate", isUpdate);
-            request.setAttribute("employeeIndex", employeeIndex);          
+            request.setAttribute("employeeIndex", arrayIndex);          
             request.setAttribute("firstName", employeeToEdit.getFirstName());
             request.setAttribute("middleName", employeeToEdit.getMiddleName());
             request.setAttribute("lastName", employeeToEdit.getLastName());
