@@ -41,7 +41,6 @@ public class Controller extends HttpServlet {
         String url = "/display.jsp";
         ArrayList<String> messages = new ArrayList<String>();
         HttpSession session = request.getSession();
-//        boolean isNewSession = session.isNew();
         String birthDateInputString = null;
         String hireDateInputString = null;
         boolean isUpdate = false;
@@ -53,8 +52,6 @@ public class Controller extends HttpServlet {
             action = "first";
         }
         
-        String updateEmployee = request.getParameter("updateEmployee");
-
         // Create the default list of employees and add
         // them to the session.
         ArrayList<Person> employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
@@ -71,20 +68,12 @@ public class Controller extends HttpServlet {
 
         if (action.equals("first")) {
             url = "/display.jsp";
-//            request.setAttribute("isNewSession", isNewSession);
             session.setAttribute("isUpdate", isUpdate);
         }
         else if (action.equals("addEmployee")) {
             String validationMessage = "";
             LocalDate birthDate = null;
             LocalDate hireDate = null;
-            
-            if (arrayIndex == -1) {
-                isUpdate = false;
-            }
-            else {
-                isUpdate = true;
-            }
             
             try {
                 arrayIndex = Integer.parseInt(request.getParameter("arrayIndex"));
@@ -148,7 +137,6 @@ public class Controller extends HttpServlet {
                     
                     // Update an existing employee.
                     employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
-//                    arrayIndex = Integer.parseInt(request.getParameter("updateEmployee"));
                     Person employeeToEdit = employeeList.get(arrayIndex);
 
                     employeeToEdit.setFirstName(firstName);
@@ -157,9 +145,6 @@ public class Controller extends HttpServlet {
                     employeeToEdit.setEmployeeID(employeeID);
                     employeeToEdit.setBirthDate(birthDate);
                     employeeToEdit.setHireDate(hireDate);
-                    
-                    session.setAttribute("isUpdate", isUpdate);
-//                    request.setAttribute("employeeIndex", employeeIndex);
                 }
             }
             else {             
@@ -173,15 +158,12 @@ public class Controller extends HttpServlet {
                 request.setAttribute("hireDateInputString", hireDateInputString);
                 
                 if (arrayIndex != -1) {
-//                    employeeList = (ArrayList<Person>) session.getAttribute("employeeList");
-//                    arrayIndex = Integer.parseInt(request.getParameter("arrayIndex"));
-//                    Person employeeToEdit = employeeList.get(arrayIndex);
-
                     request.setAttribute("employeeIndex", arrayIndex);
+                    isUpdate = true;
+                    session.setAttribute("isUpdate", isUpdate);
                 }
 
                 request.setAttribute("messages", messages);
-                session.setAttribute("isUpdate", isUpdate);
             }    
 
         }
@@ -227,11 +209,10 @@ public class Controller extends HttpServlet {
         }
         else if (action.equals("destroySession")) {
             session.invalidate();
-//            isNewSession = false;
-//            request.setAttribute("isNewSession", isNewSession);
+            isUpdate = false;
+            request.setAttribute("isUpdate", isUpdate);
         }
         
-
         ServletContext sc = getServletContext();
 
         sc.getRequestDispatcher(url)

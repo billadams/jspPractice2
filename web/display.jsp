@@ -70,12 +70,11 @@
                     </c:forEach>     
                 </tbody>
             </table>
-            <%--<c:if test="${isNewSession == true}">--%>
-                <form action="" method="post">
-                    <input type="hidden" name="action" value="destroySession">
-                    <input class="btn btn-warning" type="submit" value="Destroy Session">
-                </form>     
-            <%--</c:if>--%>
+            
+            <form action="" method="post">
+                <input type="hidden" name="action" value="destroySession">
+                <input class="btn btn-warning" type="submit" value="Destroy Session">
+            </form>     
 
         </div> <!-- end col-md-12 -->
     </div> <!-- end row results -->
