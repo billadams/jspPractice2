@@ -131,7 +131,7 @@ public class Controller extends HttpServlet {
                     // Add a new employee.
                     employeeList.add(new Person(firstName, middleName, lastName, employeeID, birthDate, hireDate));
                     session.setAttribute("employeeList", employeeList);
-                    session.setAttribute("isUpdate", isUpdate);
+//                    session.setAttribute("isUpdate", isUpdate);
                 }
                 else {
                     
@@ -145,6 +145,9 @@ public class Controller extends HttpServlet {
                     employeeToEdit.setEmployeeID(employeeID);
                     employeeToEdit.setBirthDate(birthDate);
                     employeeToEdit.setHireDate(hireDate);
+                    
+                    isUpdate = false;
+                    session.setAttribute("isUpdate", isUpdate);
                 }
             }
             else {             

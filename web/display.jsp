@@ -87,7 +87,7 @@
             <div class="form-group row">
                 <label for="first-name" class="col-md-3 col-form-label">First name:</label>
                 <div class="col-md-9">
-                    <input type="text" name="firstName" class="form-control" id="first-name" value="${firstName}">
+                    <input type="text" name="firstName" class="form-control" id="first-name" value="${firstName}" autofocus>
                 </div>
             </div>
             <div class="form-group row">
